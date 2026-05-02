@@ -2,417 +2,539 @@
 <html lang="et">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Ussimäng</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --green: #4ade80;
+      --dark:  #1a1a2e;
+      --card:  #2d3748;
+      --border:#4a5568;
+      --yellow:#facc15;
+      --pad-b: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      touch-action: none;
+      -webkit-text-size-adjust: none;
+    }
 
     body {
-      background: #1a1a2e;
+      background: var(--dark);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100dvh;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: -apple-system, 'Segoe UI', sans-serif;
       color: #eee;
-      padding: 12px 8px;
-      overflow: hidden;
-      touch-action: none;
+      padding: 8px 10px calc(8px + var(--pad-b));
+      gap: 6px;
+      height: 100dvh;
+    }
+
+    /* ── Header ── */
+    #header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
     }
 
     h1 {
-      font-size: clamp(1.2rem, 5vw, 2rem);
-      margin-bottom: 8px;
-      color: #4ade80;
-      letter-spacing: 2px;
+      font-size: clamp(1.1rem, 5vw, 1.6rem);
+      color: var(--green);
+      letter-spacing: 1px;
     }
 
-    #info {
+    #scores {
       display: flex;
-      gap: 30px;
-      margin-bottom: 10px;
-      font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+      gap: 14px;
+      font-size: clamp(0.8rem, 3.5vw, 1rem);
     }
 
-    #info span { color: #4ade80; font-weight: bold; }
+    #scores span { color: var(--green); font-weight: 700; }
 
-    #canvas-wrap {
-      position: relative;
-      line-height: 0;
-    }
-
+    /* ── Canvas ── */
     canvas {
-      border: 3px solid #4ade80;
-      border-radius: 6px;
+      border: 3px solid var(--green);
+      border-radius: 8px;
       background: #0f1923;
       display: block;
-      /* size set by JS */
+      flex-shrink: 0;
+      touch-action: none;
     }
 
+    /* ── Message ── */
     #message {
-      margin-top: 10px;
-      font-size: clamp(0.8rem, 3.5vw, 1rem);
-      min-height: 1.4em;
-      color: #facc15;
+      font-size: clamp(0.75rem, 3.2vw, 0.95rem);
+      color: var(--yellow);
       text-align: center;
-      padding: 0 8px;
+      min-height: 1.3em;
+      flex-shrink: 0;
+      padding: 0 4px;
     }
 
-    /* D-pad */
-    #dpad {
-      margin-top: 14px;
+    /* ── Mode toggle ── */
+    #mode-toggle {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .mode-btn {
+      padding: 6px 18px;
+      border-radius: 20px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      color: #94a3b8;
+      font-size: clamp(0.75rem, 3vw, 0.9rem);
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.15s;
+    }
+
+    .mode-btn.active {
+      border-color: var(--green);
+      background: #14532d;
+      color: var(--green);
+    }
+
+    /* ── Controls wrapper ── */
+    #controls {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    /* ── 4-button d-pad ── */
+    #dpad-4 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
       gap: 6px;
-      width: min(180px, 42vw);
-      height: min(180px, 42vw);
+      aspect-ratio: 1;
+      max-width: 200px;
+      max-height: 200px;
+      width: 100%;
     }
 
-    #dpad button {
-      background: #2d3748;
-      border: 2px solid #4a5568;
-      border-radius: 10px;
+    #dpad-4 .cell-btn {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
       color: #e2e8f0;
-      font-size: clamp(1.2rem, 5vw, 1.6rem);
+      font-size: clamp(1.1rem, 5vw, 1.5rem);
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
-      transition: background 0.1s;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    #dpad button:active,
-    #dpad button.pressed {
-      background: #4ade80;
-      color: #1a1a2e;
-      border-color: #4ade80;
-    }
+    #dpad-4 .cell-btn:active { background: var(--green); color: var(--dark); border-color: var(--green); }
+    #dpad-4 .cell-empty { background: transparent; border: none; }
 
-    .dpad-empty { background: transparent; border: none !important; }
-
-    /* Desktop controls hint */
-    #kbd-hint {
-      margin-top: 12px;
-      font-size: 0.78rem;
-      color: #64748b;
+    #btn4-start {
+      font-size: clamp(0.5rem, 2vw, 0.65rem) !important;
+      letter-spacing: -0.3px;
+      color: var(--yellow) !important;
+      border-color: var(--yellow) !important;
+      line-height: 1.2;
       text-align: center;
     }
 
-    #kbd-hint kbd {
-      background: #2d3748;
-      border: 1px solid #4a5568;
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-size: 0.78rem;
-      color: #cbd5e1;
+    /* ── 2-button layout ── */
+    #dpad-2 {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
     }
 
-    @media (pointer: fine) {
-      /* desktop — show keyboard hint, still show dpad smaller */
-      #dpad { width: 150px; height: 150px; }
+    .turn-btn {
+      flex: 1;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      color: #e2e8f0;
+      font-size: clamp(1.8rem, 10vw, 3rem);
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: background 0.1s, border-color 0.1s;
+      -webkit-user-select: none;
+      user-select: none;
     }
+
+    .turn-btn span.label {
+      font-size: clamp(0.65rem, 2.5vw, 0.8rem);
+      color: #94a3b8;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .turn-btn:active, .turn-btn.pressed {
+      background: #14532d;
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    #btn2-start {
+      width: min(80px, 22vw);
+      flex: 0 0 auto;
+      background: var(--card);
+      border: 2px solid var(--yellow);
+      border-radius: 16px;
+      color: var(--yellow);
+      font-size: clamp(0.55rem, 2.2vw, 0.75rem);
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      line-height: 1.3;
+      text-align: center;
+    }
+
+    #btn2-start:active { background: #422006; }
+
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-<h1>🐍 Ussimäng</h1>
-
-<div id="info">
-  Skoor: <span id="score">0</span>
-  &nbsp;|&nbsp;
-  Rekord: <span id="highscore">0</span>
+<div id="header">
+  <h1>🐍 Ussimäng</h1>
+  <div id="scores">Skoor: <span id="score">0</span> &nbsp;|&nbsp; Rekord: <span id="hs">0</span></div>
 </div>
 
-<div id="canvas-wrap">
-  <canvas id="canvas"></canvas>
+<canvas id="canvas"></canvas>
+
+<div id="message">Vali režiim ja vajuta <strong>▶ ALUSTA</strong></div>
+
+<div id="mode-toggle">
+  <button class="mode-btn active" id="mode4">🕹 4 nuppu</button>
+  <button class="mode-btn"        id="mode2">👆 2 nuppu</button>
 </div>
 
-<div id="message">Vajuta <strong>▶ ALUSTA</strong> või tühikut</div>
+<div id="controls">
 
-<div id="dpad">
-  <div class="dpad-empty"></div>
-  <button id="btn-up">▲</button>
-  <div class="dpad-empty"></div>
-  <button id="btn-left">◀</button>
-  <button id="btn-start" style="font-size:clamp(0.55rem,2.2vw,0.7rem);letter-spacing:-0.5px;color:#facc15;border-color:#facc15;">▶ ALUSTA</button>
-  <button id="btn-right">▶</button>
-  <div class="dpad-empty"></div>
-  <button id="btn-down">▼</button>
-  <div class="dpad-empty"></div>
-</div>
+  <!-- 4-button d-pad -->
+  <div id="dpad-4">
+    <div class="cell-empty"></div>
+    <button class="cell-btn" id="btn4-up">▲</button>
+    <div class="cell-empty"></div>
+    <button class="cell-btn" id="btn4-left">◀</button>
+    <button class="cell-btn" id="btn4-start">▶<br>ALUSTA</button>
+    <button class="cell-btn" id="btn4-right">▶</button>
+    <div class="cell-empty"></div>
+    <button class="cell-btn" id="btn4-down">▼</button>
+    <div class="cell-empty"></div>
+  </div>
 
-<div id="kbd-hint">
-  Klaviatuur: <kbd>↑↓←→</kbd> liiguta &nbsp;|&nbsp; <kbd>P</kbd> paus &nbsp;|&nbsp; <kbd>tühik</kbd> alusta
+  <!-- 2-button layout -->
+  <div id="dpad-2" class="hidden">
+    <button class="turn-btn" id="btn2-left">
+      ↺
+      <span class="label">VASAK</span>
+    </button>
+    <button id="btn2-start">▶<br>ALUSTA</button>
+    <button class="turn-btn" id="btn2-right">
+      ↻
+      <span class="label">PAREM</span>
+    </button>
+  </div>
+
 </div>
 
 <script>
-  // ── Canvas sizing ──────────────────────────────────────────────
-  const canvas = document.getElementById('canvas');
-  const ctx    = canvas.getContext('2d');
+// ── Canvas sizing ──────────────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+const COLS = 20, ROWS = 20;
 
-  function resize() {
-    // Leave room for header + dpad + message on screen
-    const maxW = Math.min(window.innerWidth - 16, window.innerHeight * 0.52);
-    const size = Math.floor(maxW / 20) * 20; // multiple of 20 grid cells
-    canvas.width  = size;
-    canvas.height = size;
-    if (state !== 'running' && state !== 'paused') draw();
-  }
+function sizeCanvas() {
+  // measure what's left after all other elements
+  const bodyH    = window.innerHeight;
+  const bodyW    = window.innerWidth - 20;
+  const usedH    = document.getElementById('header').offsetHeight
+                 + document.getElementById('message').offsetHeight
+                 + document.getElementById('mode-toggle').offsetHeight
+                 + document.getElementById('controls').offsetHeight
+                 + 6*4 + 16            // gaps + body padding
+                 + parseInt(getComputedStyle(document.body).paddingBottom);
+  const avail    = Math.min(bodyW, bodyH - usedH);
+  const size     = Math.max(160, Math.floor(avail / COLS) * COLS);
+  canvas.width   = size;
+  canvas.height  = size;
+}
 
-  window.addEventListener('resize', resize);
+// ── Direction constants ────────────────────────────────────────────────────
+const DIR = {
+  UP:    {x: 0, y:-1},
+  DOWN:  {x: 0, y: 1},
+  LEFT:  {x:-1, y: 0},
+  RIGHT: {x: 1, y: 0}
+};
 
-  // ── Constants ─────────────────────────────────────────────────
-  const COLS = 20, ROWS = 20;
-  const DIR  = {
-    UP:    {x: 0, y:-1},
-    DOWN:  {x: 0, y: 1},
-    LEFT:  {x:-1, y: 0},
-    RIGHT: {x: 1, y: 0}
+// relative turning: rotate dir vector
+function turnLeft(d)  { return {x: d.y,  y: -d.x}; }
+function turnRight(d) { return {x: -d.y, y:  d.x}; }
+
+// ── State ──────────────────────────────────────────────────────────────────
+let snake, dir, nextDir, food, score, highscore, state, interval, speed;
+let controlMode = '4'; // '4' or '2'
+state = 'idle';
+
+const scoreEl = document.getElementById('score');
+const hsEl    = document.getElementById('hs');
+const msgEl   = document.getElementById('message');
+
+highscore = parseInt(localStorage.getItem('snake_hs') || '0');
+hsEl.textContent = highscore;
+
+// ── Mode toggle ────────────────────────────────────────────────────────────
+document.getElementById('mode4').addEventListener('click', () => setMode('4'));
+document.getElementById('mode2').addEventListener('click', () => setMode('2'));
+
+function setMode(m) {
+  controlMode = m;
+  document.getElementById('mode4').classList.toggle('active', m==='4');
+  document.getElementById('mode2').classList.toggle('active', m==='2');
+  document.getElementById('dpad-4').classList.toggle('hidden', m==='2');
+  document.getElementById('dpad-2').classList.toggle('hidden', m==='4');
+}
+
+// ── Game logic ─────────────────────────────────────────────────────────────
+function init() {
+  snake    = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+  dir      = DIR.RIGHT;
+  nextDir  = DIR.RIGHT;
+  score    = 0;
+  speed    = 145;
+  scoreEl.textContent = 0;
+  placeFood();
+  state = 'running';
+  msgEl.textContent = '';
+  clearInterval(interval);
+  interval = setInterval(tick, speed);
+}
+
+function placeFood() {
+  let p;
+  do { p = {x: Math.floor(Math.random()*COLS), y: Math.floor(Math.random()*ROWS)}; }
+  while (snake.some(s => s.x===p.x && s.y===p.y));
+  food = p;
+}
+
+function tick() {
+  dir = nextDir;
+  const head = {
+    x: (snake[0].x + dir.x + COLS) % COLS,
+    y: (snake[0].y + dir.y + ROWS) % ROWS
   };
-
-  // ── State ──────────────────────────────────────────────────────
-  let snake, dir, nextDir, food, score, highscore, state, interval, currentSpeed;
-  // state: 'idle' | 'running' | 'paused' | 'dead'
-
-  const scoreEl     = document.getElementById('score');
-  const highscoreEl = document.getElementById('highscore');
-  const messageEl   = document.getElementById('message');
-
-  highscore = parseInt(localStorage.getItem('snake_hs') || '0');
-  highscoreEl.textContent = highscore;
-  state = 'idle';
-
-  // ── Game logic ────────────────────────────────────────────────
-  function init() {
-    snake      = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
-    dir        = DIR.RIGHT;
-    nextDir    = DIR.RIGHT;
-    score      = 0;
-    scoreEl.textContent = 0;
+  if (snake.some(s => s.x===head.x && s.y===head.y)) { die(); return; }
+  snake.unshift(head);
+  if (head.x===food.x && head.y===food.y) {
+    score++;
+    scoreEl.textContent = score;
+    if (score > highscore) {
+      highscore = score;
+      hsEl.textContent = highscore;
+      localStorage.setItem('snake_hs', highscore);
+    }
     placeFood();
-    currentSpeed = 140;
-    state = 'running';
-    messageEl.textContent = '';
-    clearInterval(interval);
-    interval = setInterval(tick, currentSpeed);
-  }
-
-  function placeFood() {
-    let pos;
-    do {
-      pos = {x: Math.floor(Math.random()*COLS), y: Math.floor(Math.random()*ROWS)};
-    } while (snake.some(s => s.x===pos.x && s.y===pos.y));
-    food = pos;
-  }
-
-  function tick() {
-    dir = nextDir;
-    const head = {
-      x: (snake[0].x + dir.x + COLS) % COLS,
-      y: (snake[0].y + dir.y + ROWS) % ROWS
-    };
-
-    if (snake.some(s => s.x===head.x && s.y===head.y)) { die(); return; }
-
-    snake.unshift(head);
-
-    if (head.x===food.x && head.y===food.y) {
-      score++;
-      scoreEl.textContent = score;
-      if (score > highscore) {
-        highscore = score;
-        highscoreEl.textContent = highscore;
-        localStorage.setItem('snake_hs', highscore);
-      }
-      placeFood();
-      if (score % 5 === 0) {
-        clearInterval(interval);
-        currentSpeed = Math.max(55, 140 - score * 4);
-        interval = setInterval(tick, currentSpeed);
-      }
-    } else {
-      snake.pop();
-    }
-    draw();
-  }
-
-  function die() {
-    clearInterval(interval);
-    state = 'dead';
-    draw();
-    messageEl.innerHTML = `Mäng läbi! Skoor: <strong>${score}</strong> — vajuta <strong>▶ ALUSTA</strong>`;
-  }
-
-  // ── Drawing ────────────────────────────────────────────────────
-  function draw() {
-    const W    = canvas.width;
-    const H    = canvas.height;
-    const CELL = W / COLS;
-
-    ctx.clearRect(0, 0, W, H);
-
-    // grid
-    ctx.strokeStyle = '#1e2d3d';
-    ctx.lineWidth   = 0.5;
-    for (let i=0; i<=COLS; i++) {
-      ctx.beginPath(); ctx.moveTo(i*CELL,0); ctx.lineTo(i*CELL,H); ctx.stroke();
-    }
-    for (let j=0; j<=ROWS; j++) {
-      ctx.beginPath(); ctx.moveTo(0,j*CELL); ctx.lineTo(W,j*CELL); ctx.stroke();
-    }
-
-    // food
-    const fx = food.x*CELL + CELL/2;
-    const fy = food.y*CELL + CELL/2;
-    const fr = CELL/2 - Math.max(2, CELL*0.08);
-    ctx.beginPath();
-    ctx.arc(fx, fy, fr, 0, Math.PI*2);
-    ctx.fillStyle = state==='dead' ? '#555' : '#f87171';
-    ctx.fill();
-    ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(fx, fy-fr);
-    ctx.lineTo(fx+Math.max(2,CELL*0.1), fy-fr-Math.max(3,CELL*0.15));
-    ctx.stroke();
-
-    // snake
-    snake.forEach((seg, i) => {
-      const x = seg.x*CELL+1, y = seg.y*CELL+1, s = CELL-2;
-      const r = Math.max(2, s*0.2);
-
-      if (state==='dead') {
-        ctx.fillStyle = '#555';
-      } else if (i===0) {
-        ctx.fillStyle = '#22c55e';
-      } else {
-        const t = i / snake.length;
-        ctx.fillStyle = `hsl(${140 - t*30},70%,${45-t*10}%)`;
-      }
-
-      ctx.beginPath();
-      ctx.roundRect(x, y, s, s, r);
-      ctx.fill();
-
-      // eyes
-      if (i===0 && state!=='dead') {
-        const ex = seg.x*CELL + CELL*0.35 + dir.x*CELL*0.1;
-        const ey = seg.y*CELL + CELL*0.35 + dir.y*CELL*0.1;
-        const er = Math.max(1.5, CELL*0.08);
-        ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.arc(ex, ey, er*1.5, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#1a1a2e';
-        ctx.beginPath(); ctx.arc(ex+dir.x*er*0.5, ey+dir.y*er*0.5, er*0.8, 0, Math.PI*2); ctx.fill();
-      }
-    });
-
-    // idle overlay
-    if (state==='idle') {
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = '#4ade80';
-      ctx.font = `bold ${Math.max(16,W*0.07)}px Segoe UI`;
-      ctx.textAlign = 'center';
-      ctx.fillText('🐍 USSIMÄNG', W/2, H/2-W*0.04);
-      ctx.fillStyle = '#facc15';
-      ctx.font = `${Math.max(12,W*0.045)}px Segoe UI`;
-      ctx.fillText('Vajuta ▶ ALUSTA', W/2, H/2+W*0.06);
-      ctx.textAlign = 'left';
-    }
-
-    // pause overlay
-    if (state==='paused') {
-      ctx.fillStyle = 'rgba(0,0,0,0.55)';
-      ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = '#facc15';
-      ctx.font = `bold ${Math.max(18,W*0.1)}px Segoe UI`;
-      ctx.textAlign = 'center';
-      ctx.fillText('PAUS', W/2, H/2);
-      ctx.textAlign = 'left';
-    }
-  }
-
-  // ── Keyboard ──────────────────────────────────────────────────
-  document.addEventListener('keydown', e => {
-    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
-
-    if (state==='idle' || state==='dead') {
-      if (e.code==='Space') { init(); return; }
-    }
-    if (e.code==='Space' || e.key==='p' || e.key==='P') {
-      togglePause(); return;
-    }
-    if (state!=='running') return;
-    changeDir(e.key);
-  });
-
-  function changeDir(key) {
-    if ((key==='ArrowUp'    || key==='w' || key==='W') && dir!==DIR.DOWN)  nextDir=DIR.UP;
-    if ((key==='ArrowDown'  || key==='s' || key==='S') && dir!==DIR.UP)    nextDir=DIR.DOWN;
-    if ((key==='ArrowLeft'  || key==='a' || key==='A') && dir!==DIR.RIGHT) nextDir=DIR.LEFT;
-    if ((key==='ArrowRight' || key==='d' || key==='D') && dir!==DIR.LEFT)  nextDir=DIR.RIGHT;
-  }
-
-  function togglePause() {
-    if (state==='running') {
+    if (score % 5 === 0) {
       clearInterval(interval);
-      state='paused';
-      messageEl.textContent='Paus — vajuta P või nuppu jätkamiseks';
-      draw();
-    } else if (state==='paused') {
-      state='running';
-      messageEl.textContent='';
-      interval=setInterval(tick, currentSpeed);
+      speed = Math.max(55, 145 - score*4);
+      interval = setInterval(tick, speed);
+    }
+  } else {
+    snake.pop();
+  }
+  draw();
+}
+
+function die() {
+  clearInterval(interval);
+  state = 'dead';
+  draw();
+  msgEl.innerHTML = `Mäng läbi! Skoor: <strong>${score}</strong> — vajuta <strong>▶ ALUSTA</strong>`;
+}
+
+function togglePause() {
+  if (state==='running') {
+    clearInterval(interval);
+    state = 'paused';
+    msgEl.textContent = 'Paus — vajuta uuesti jätkamiseks';
+    draw();
+  } else if (state==='paused') {
+    state = 'running';
+    msgEl.textContent = '';
+    interval = setInterval(tick, speed);
+  }
+}
+
+// ── Absolute direction input (4-button + keyboard + swipe) ────────────────
+function absDir(key) {
+  if (state==='idle'||state==='dead') { init(); return; }
+  if (state==='paused') { togglePause(); return; }
+  if (state!=='running') return;
+  if ((key==='ArrowUp'    ||key==='w'||key==='W') && dir!==DIR.DOWN)  nextDir=DIR.UP;
+  if ((key==='ArrowDown'  ||key==='s'||key==='S') && dir!==DIR.UP)    nextDir=DIR.DOWN;
+  if ((key==='ArrowLeft'  ||key==='a'||key==='A') && dir!==DIR.RIGHT) nextDir=DIR.LEFT;
+  if ((key==='ArrowRight' ||key==='d'||key==='D') && dir!==DIR.LEFT)  nextDir=DIR.RIGHT;
+}
+
+// ── Relative direction input (2-button) ───────────────────────────────────
+function relDir(turn) { // 'L' or 'R'
+  if (state==='idle'||state==='dead') { init(); return; }
+  if (state==='paused') { togglePause(); return; }
+  if (state!=='running') return;
+  nextDir = turn==='L' ? turnLeft(dir) : turnRight(dir);
+}
+
+// ── Keyboard ──────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ([' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+  if (e.code==='Space') {
+    if (state==='idle'||state==='dead') init();
+    else togglePause();
+    return;
+  }
+  if (e.key==='p'||e.key==='P') { togglePause(); return; }
+  if (controlMode==='4') {
+    absDir(e.key);
+  } else {
+    if (e.key==='ArrowLeft' ||e.key==='a'||e.key==='A') relDir('L');
+    if (e.key==='ArrowRight'||e.key==='d'||e.key==='D') relDir('R');
+  }
+});
+
+// ── 4-button wiring ───────────────────────────────────────────────────────
+document.getElementById('btn4-up').addEventListener('click',    () => absDir('ArrowUp'));
+document.getElementById('btn4-down').addEventListener('click',  () => absDir('ArrowDown'));
+document.getElementById('btn4-left').addEventListener('click',  () => absDir('ArrowLeft'));
+document.getElementById('btn4-right').addEventListener('click', () => absDir('ArrowRight'));
+document.getElementById('btn4-start').addEventListener('click', () => {
+  if (state==='idle'||state==='dead') init(); else togglePause();
+});
+
+// ── 2-button wiring ───────────────────────────────────────────────────────
+// Use touchstart for instant response on iPhone
+function fastBtn(id, fn) {
+  const el = document.getElementById(id);
+  el.addEventListener('touchstart', e => { e.preventDefault(); fn(); el.classList.add('pressed'); }, {passive:false});
+  el.addEventListener('touchend',   e => { e.preventDefault(); el.classList.remove('pressed'); },   {passive:false});
+  el.addEventListener('click', fn);
+}
+
+fastBtn('btn2-left',  () => relDir('L'));
+fastBtn('btn2-right', () => relDir('R'));
+document.getElementById('btn2-start').addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (state==='idle'||state==='dead') init(); else togglePause();
+}, {passive:false});
+document.getElementById('btn2-start').addEventListener('click', () => {
+  if (state==='idle'||state==='dead') init(); else togglePause();
+});
+
+// ── Swipe on canvas ────────────────────────────────────────────────────────
+let tx=null, ty=null;
+canvas.addEventListener('touchstart', e => { e.preventDefault(); tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:false});
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  if (tx===null) return;
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  tx=null; ty=null;
+  if (state==='idle'||state==='dead') { init(); return; }
+  if (Math.abs(dx)<20 && Math.abs(dy)<20) return;
+  if (controlMode==='4') {
+    absDir(Math.abs(dx)>Math.abs(dy) ? (dx>0?'ArrowRight':'ArrowLeft') : (dy>0?'ArrowDown':'ArrowUp'));
+  } else {
+    // swipe perpendicular to movement = turn; same axis = ignore
+    if (Math.abs(dx)>Math.abs(dy)) {
+      relDir(dx>0?'R':'L');
+    } else {
+      relDir(dy>0?'R':'L');
     }
   }
+}, {passive:false});
 
-  // ── D-pad buttons ──────────────────────────────────────────────
-  function dpadPress(dirKey) {
-    if (state==='idle' || state==='dead') { init(); return; }
-    if (state==='paused') { togglePause(); return; }
-    changeDir(dirKey);
-  }
+// ── Drawing ────────────────────────────────────────────────────────────────
+function draw() {
+  const W=canvas.width, H=canvas.height, C=W/COLS;
+  ctx.clearRect(0,0,W,H);
 
-  document.getElementById('btn-up').addEventListener('click',    () => dpadPress('ArrowUp'));
-  document.getElementById('btn-down').addEventListener('click',  () => dpadPress('ArrowDown'));
-  document.getElementById('btn-left').addEventListener('click',  () => dpadPress('ArrowLeft'));
-  document.getElementById('btn-right').addEventListener('click', () => dpadPress('ArrowRight'));
-  document.getElementById('btn-start').addEventListener('click', () => {
-    if (state==='idle' || state==='dead') { init(); return; }
-    togglePause();
+  // grid
+  ctx.strokeStyle='#1e2d3d'; ctx.lineWidth=0.5;
+  for(let i=0;i<=COLS;i++){ctx.beginPath();ctx.moveTo(i*C,0);ctx.lineTo(i*C,H);ctx.stroke();}
+  for(let j=0;j<=ROWS;j++){ctx.beginPath();ctx.moveTo(0,j*C);ctx.lineTo(W,j*C);ctx.stroke();}
+
+  // food
+  const fx=food.x*C+C/2, fy=food.y*C+C/2, fr=C/2-Math.max(2,C*0.08);
+  ctx.beginPath(); ctx.arc(fx,fy,fr,0,Math.PI*2);
+  ctx.fillStyle = state==='dead'?'#555':'#f87171'; ctx.fill();
+  ctx.strokeStyle='#4ade80'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(fx,fy-fr); ctx.lineTo(fx+Math.max(2,C*0.1),fy-fr-Math.max(3,C*0.15)); ctx.stroke();
+
+  // snake
+  snake.forEach((seg,i) => {
+    const x=seg.x*C+1, y=seg.y*C+1, s=C-2, r=Math.max(2,s*0.2);
+    ctx.fillStyle = state==='dead' ? '#555' : i===0 ? '#22c55e' : `hsl(${140-i/snake.length*30},70%,${45-i/snake.length*10}%)`;
+    ctx.beginPath(); ctx.roundRect(x,y,s,s,r); ctx.fill();
+    if(i===0 && state!=='dead'){
+      const ex=seg.x*C+C*0.35+dir.x*C*0.1, ey=seg.y*C+C*0.35+dir.y*C*0.1, er=Math.max(1.5,C*0.08);
+      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(ex,ey,er*1.5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#1a1a2e'; ctx.beginPath(); ctx.arc(ex+dir.x*er*0.5,ey+dir.y*er*0.5,er*0.8,0,Math.PI*2); ctx.fill();
+    }
   });
 
-  // ── Swipe gestures ────────────────────────────────────────────
-  let touchX=null, touchY=null;
-
-  canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    touchX = e.touches[0].clientX;
-    touchY = e.touches[0].clientY;
-  }, {passive:false});
-
-  canvas.addEventListener('touchend', e => {
-    e.preventDefault();
-    if (touchX===null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    const dy = e.changedTouches[0].clientY - touchY;
-    touchX=null; touchY=null;
-
-    if (state==='idle' || state==='dead') { init(); return; }
-    if (state==='paused') { togglePause(); return; }
-
-    const minSwipe = 20;
-    if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) return;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-      changeDir(dx>0 ? 'ArrowRight' : 'ArrowLeft');
+  // overlays
+  if(state==='idle'||state==='dead'||state==='paused'){
+    ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    if(state==='idle'){
+      ctx.fillStyle='#4ade80'; ctx.font=`bold ${Math.max(14,W*0.07)}px -apple-system,sans-serif`;
+      ctx.fillText('🐍 USSIMÄNG',W/2,H/2-W*0.05);
+      ctx.fillStyle='#facc15'; ctx.font=`${Math.max(11,W*0.043)}px -apple-system,sans-serif`;
+      ctx.fillText('Vajuta ▶ ALUSTA',W/2,H/2+W*0.06);
+    } else if(state==='dead'){
+      ctx.fillStyle='#f87171'; ctx.font=`bold ${Math.max(14,W*0.07)}px -apple-system,sans-serif`;
+      ctx.fillText('MÄNG LÄBI',W/2,H/2-W*0.04);
+      ctx.fillStyle='#facc15'; ctx.font=`${Math.max(11,W*0.043)}px -apple-system,sans-serif`;
+      ctx.fillText(`Skoor: ${score}`,W/2,H/2+W*0.05);
     } else {
-      changeDir(dy>0 ? 'ArrowDown' : 'ArrowUp');
+      ctx.fillStyle='#facc15'; ctx.font=`bold ${Math.max(18,W*0.1)}px -apple-system,sans-serif`;
+      ctx.fillText('PAUS',W/2,H/2);
     }
-  }, {passive:false});
+    ctx.textAlign='left';
+  }
+}
 
-  // ── Init ──────────────────────────────────────────────────────
-  resize();
+// ── Init ──────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => { sizeCanvas(); if(state!=='running') draw(); });
+sizeCanvas();
+snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}]; dir=DIR.RIGHT; food={x:15,y:10};
+draw();
 </script>
 </body>
 </html>
