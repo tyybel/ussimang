@@ -122,7 +122,7 @@
       border:2px solid #4a5568;
       border-radius:10px;
       color:#e2e8f0;
-      font-size:1.1rem;
+      font-size:1.5rem;
       cursor:pointer;
       touch-action:manipulation;
       -webkit-tap-highlight-color:transparent;
@@ -267,7 +267,7 @@ const msgEl   = document.getElementById('message');
 
 // ── Sizing ─────────────────────────────────────────────────────────────────
 // Fixed heights (px) reserved for non-canvas UI
-const CTRL_H_4 = 100;   // d-pad height
+const CTRL_H_4 = 155;   // d-pad height
 const CTRL_H_2 = 78;    // 2-button height
 const FIXED_H  = 28     // header
                + 16     // message
@@ -292,7 +292,7 @@ function sizeCanvas() {
   canvas.height = Math.max(160, size);
 
   // sync d-pad and 2-button sizes
-  const dpadS = Math.min(ctrlH, 120);
+  const dpadS = Math.min(ctrlH, 155);
   document.documentElement.style.setProperty('--dpad-size', dpadS + 'px');
   document.documentElement.style.setProperty('--btn2-h', ctrlH + 'px');
 
