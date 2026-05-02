@@ -7,216 +7,208 @@
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-    :root {
-      --green: #4ade80;
-      --dark:  #1a1a2e;
-      --card:  #2d3748;
-      --border:#4a5568;
-      --yellow:#facc15;
-      --pad-b: env(safe-area-inset-bottom, 0px);
-    }
-
     html, body {
-      width: 100%; height: 100%;
-      overflow: hidden;
-      touch-action: none;
-      -webkit-text-size-adjust: none;
+      width:100%; height:100%;
+      overflow:hidden;
+      touch-action:none;
+      -webkit-text-size-adjust:none;
     }
 
     body {
-      background: var(--dark);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-family: -apple-system, 'Segoe UI', sans-serif;
-      color: #eee;
-      padding: 8px 10px calc(8px + var(--pad-b));
-      gap: 6px;
-      height: 100dvh;
+      background:#1a1a2e;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      font-family:-apple-system,'Segoe UI',sans-serif;
+      color:#eee;
+      /* safe-area for iPhone notch/home bar */
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+      gap:5px;
+      height:100dvh;
     }
 
-    /* ── Header ── */
+    /* ── Header ─────────────────────────────────── */
     #header {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      flex-shrink:0;
+      height:28px;
     }
 
-    h1 {
-      font-size: clamp(1.1rem, 5vw, 1.6rem);
-      color: var(--green);
-      letter-spacing: 1px;
-    }
+    h1 { font-size:1.1rem; color:#4ade80; letter-spacing:1px; }
 
-    #scores {
-      display: flex;
-      gap: 14px;
-      font-size: clamp(0.8rem, 3.5vw, 1rem);
-    }
+    #scores { font-size:0.85rem; }
+    #scores span { color:#4ade80; font-weight:700; }
 
-    #scores span { color: var(--green); font-weight: 700; }
-
-    /* ── Canvas ── */
+    /* ── Canvas ─────────────────────────────────── */
     canvas {
-      border: 3px solid var(--green);
-      border-radius: 8px;
-      background: #0f1923;
-      display: block;
-      flex-shrink: 0;
-      touch-action: none;
+      border:3px solid #4ade80;
+      border-radius:8px;
+      background:#0f1923;
+      display:block;
+      flex-shrink:0;
+      touch-action:none;
     }
 
-    /* ── Message ── */
+    /* ── Message ────────────────────────────────── */
     #message {
-      font-size: clamp(0.75rem, 3.2vw, 0.95rem);
-      color: var(--yellow);
-      text-align: center;
-      min-height: 1.3em;
-      flex-shrink: 0;
-      padding: 0 4px;
+      font-size:0.78rem;
+      color:#facc15;
+      text-align:center;
+      flex-shrink:0;
+      height:16px;
+      line-height:16px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      width:100%;
+      padding:0 4px;
     }
 
-    /* ── Mode toggle ── */
+    /* ── Mode toggle ─────────────────────────────── */
     #mode-toggle {
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0;
+      display:flex;
+      gap:8px;
+      flex-shrink:0;
+      height:28px;
     }
 
     .mode-btn {
-      padding: 6px 18px;
-      border-radius: 20px;
-      border: 2px solid var(--border);
-      background: var(--card);
-      color: #94a3b8;
-      font-size: clamp(0.75rem, 3vw, 0.9rem);
-      font-weight: 600;
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      transition: all 0.15s;
+      padding:0 14px;
+      height:28px;
+      border-radius:14px;
+      border:2px solid #4a5568;
+      background:#2d3748;
+      color:#94a3b8;
+      font-size:0.75rem;
+      font-weight:600;
+      cursor:pointer;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      transition:all 0.15s;
     }
 
     .mode-btn.active {
-      border-color: var(--green);
-      background: #14532d;
-      color: var(--green);
+      border-color:#4ade80;
+      background:#14532d;
+      color:#4ade80;
     }
 
-    /* ── Controls wrapper ── */
+    /* ── Controls area – fixed height ───────────── */
     #controls {
-      width: 100%;
-      flex: 1;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      min-height: 0;
+      width:100%;
+      flex-shrink:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      /* height set by JS after mode switch */
     }
 
-    /* ── 4-button d-pad ── */
+    /* ── 4-button d-pad ─────────────────────────── */
     #dpad-4 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(3, 1fr);
-      gap: 6px;
-      aspect-ratio: 1;
-      max-width: 200px;
-      max-height: 200px;
-      width: 100%;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      grid-template-rows:repeat(3,1fr);
+      gap:5px;
+      /* square: sized by JS */
+      width:var(--dpad-size,100px);
+      height:var(--dpad-size,100px);
     }
 
     #dpad-4 .cell-btn {
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      color: #e2e8f0;
-      font-size: clamp(1.1rem, 5vw, 1.5rem);
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      display: flex; align-items: center; justify-content: center;
+      background:#2d3748;
+      border:2px solid #4a5568;
+      border-radius:10px;
+      color:#e2e8f0;
+      font-size:1.1rem;
+      cursor:pointer;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      display:flex; align-items:center; justify-content:center;
     }
 
-    #dpad-4 .cell-btn:active { background: var(--green); color: var(--dark); border-color: var(--green); }
-    #dpad-4 .cell-empty { background: transparent; border: none; }
+    #dpad-4 .cell-btn:active { background:#4ade80; color:#1a1a2e; border-color:#4ade80; }
+    #dpad-4 .cell-empty { background:transparent; border:none; }
 
     #btn4-start {
-      font-size: clamp(0.5rem, 2vw, 0.65rem) !important;
-      letter-spacing: -0.3px;
-      color: var(--yellow) !important;
-      border-color: var(--yellow) !important;
-      line-height: 1.2;
-      text-align: center;
+      font-size:0.5rem !important;
+      font-weight:700;
+      color:#facc15 !important;
+      border-color:#facc15 !important;
+      line-height:1.3;
+      text-align:center;
     }
 
-    /* ── 2-button layout ── */
+    /* ── 2-button layout ────────────────────────── */
     #dpad-2 {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-      max-width: 420px;
+      display:flex;
+      gap:8px;
+      width:100%;
+      max-width:400px;
+      /* height set by JS */
+      height:var(--btn2-h, 80px);
     }
 
     .turn-btn {
-      flex: 1;
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      color: #e2e8f0;
-      font-size: clamp(1.8rem, 10vw, 3rem);
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      transition: background 0.1s, border-color 0.1s;
-      -webkit-user-select: none;
-      user-select: none;
+      flex:1;
+      background:#2d3748;
+      border:2px solid #4a5568;
+      border-radius:14px;
+      color:#e2e8f0;
+      font-size:2rem;
+      cursor:pointer;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:2px;
+      -webkit-user-select:none;
+      user-select:none;
     }
 
-    .turn-btn span.label {
-      font-size: clamp(0.65rem, 2.5vw, 0.8rem);
-      color: #94a3b8;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+    .turn-btn .lbl {
+      font-size:0.6rem;
+      color:#94a3b8;
+      font-weight:700;
+      letter-spacing:0.5px;
     }
 
     .turn-btn:active, .turn-btn.pressed {
-      background: #14532d;
-      border-color: var(--green);
-      color: var(--green);
+      background:#14532d;
+      border-color:#4ade80;
+      color:#4ade80;
     }
 
     #btn2-start {
-      width: min(80px, 22vw);
-      flex: 0 0 auto;
-      background: var(--card);
-      border: 2px solid var(--yellow);
-      border-radius: 16px;
-      color: var(--yellow);
-      font-size: clamp(0.55rem, 2.2vw, 0.75rem);
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      line-height: 1.3;
-      text-align: center;
+      width:60px;
+      flex:0 0 60px;
+      background:#2d3748;
+      border:2px solid #facc15;
+      border-radius:14px;
+      color:#facc15;
+      font-size:0.6rem;
+      font-weight:700;
+      letter-spacing:0.3px;
+      cursor:pointer;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:2px;
+      line-height:1.3;
+      text-align:center;
     }
 
-    #btn2-start:active { background: #422006; }
+    #btn2-start .start-icon { font-size:1.1rem; }
+    #btn2-start:active { background:#422006; }
 
-    .hidden { display: none !important; }
+    .hidden { display:none !important; }
   </style>
 </head>
 <body>
@@ -228,7 +220,7 @@
 
 <canvas id="canvas"></canvas>
 
-<div id="message">Vali režiim ja vajuta <strong>▶ ALUSTA</strong></div>
+<div id="message">Vali režiim ja vajuta ▶ ALUSTA</div>
 
 <div id="mode-toggle">
   <button class="mode-btn active" id="mode4">🕹 4 nuppu</button>
@@ -236,7 +228,6 @@
 </div>
 
 <div id="controls">
-
   <!-- 4-button d-pad -->
   <div id="dpad-4">
     <div class="cell-empty"></div>
@@ -252,84 +243,94 @@
 
   <!-- 2-button layout -->
   <div id="dpad-2" class="hidden">
-    <button class="turn-btn" id="btn2-left">
-      ↺
-      <span class="label">VASAK</span>
-    </button>
-    <button id="btn2-start">▶<br>ALUSTA</button>
-    <button class="turn-btn" id="btn2-right">
-      ↻
-      <span class="label">PAREM</span>
-    </button>
+    <button class="turn-btn" id="btn2-left">↺<span class="lbl">VASAK</span></button>
+    <button id="btn2-start"><span class="start-icon">▶</span>ALUSTA</button>
+    <button class="turn-btn" id="btn2-right">↻<span class="lbl">PAREM</span></button>
   </div>
-
 </div>
 
 <script>
-// ── Canvas sizing ──────────────────────────────────────────────────────────
-const canvas = document.getElementById('canvas');
-const ctx    = canvas.getContext('2d');
+// ── Constants ──────────────────────────────────────────────────────────────
 const COLS = 20, ROWS = 20;
-
-function sizeCanvas() {
-  // measure what's left after all other elements
-  const bodyH    = window.innerHeight;
-  const bodyW    = window.innerWidth - 20;
-  const usedH    = document.getElementById('header').offsetHeight
-                 + document.getElementById('message').offsetHeight
-                 + document.getElementById('mode-toggle').offsetHeight
-                 + document.getElementById('controls').offsetHeight
-                 + 6*4 + 16            // gaps + body padding
-                 + parseInt(getComputedStyle(document.body).paddingBottom);
-  const avail    = Math.min(bodyW, bodyH - usedH);
-  const size     = Math.max(160, Math.floor(avail / COLS) * COLS);
-  canvas.width   = size;
-  canvas.height  = size;
-}
-
-// ── Direction constants ────────────────────────────────────────────────────
 const DIR = {
-  UP:    {x: 0, y:-1},
-  DOWN:  {x: 0, y: 1},
+  UP:    {x:0,  y:-1},
+  DOWN:  {x:0,  y: 1},
   LEFT:  {x:-1, y: 0},
-  RIGHT: {x: 1, y: 0}
+  RIGHT: {x:1,  y: 0}
 };
 
-// relative turning: rotate dir vector
-function turnLeft(d)  { return {x: d.y,  y: -d.x}; }
-function turnRight(d) { return {x: -d.y, y:  d.x}; }
-
-// ── State ──────────────────────────────────────────────────────────────────
-let snake, dir, nextDir, food, score, highscore, state, interval, speed;
-let controlMode = '4'; // '4' or '2'
-state = 'idle';
-
+const canvas  = document.getElementById('canvas');
+const ctx     = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const hsEl    = document.getElementById('hs');
 const msgEl   = document.getElementById('message');
 
-highscore = parseInt(localStorage.getItem('snake_hs') || '0');
-hsEl.textContent = highscore;
+// ── Sizing ─────────────────────────────────────────────────────────────────
+// Fixed heights (px) reserved for non-canvas UI
+const CTRL_H_4 = 100;   // d-pad height
+const CTRL_H_2 = 78;    // 2-button height
+const FIXED_H  = 28     // header
+               + 16     // message
+               + 28     // mode-toggle
+               + 5*4    // 4 gaps of 5px
+               + 6*2;   // top + bottom body padding (excluding safe area)
 
-// ── Mode toggle ────────────────────────────────────────────────────────────
+let controlMode = '4';
+
+function sizeCanvas() {
+  const safeB  = parseFloat(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--pad-b')
+  ) || 0;
+
+  const ctrlH = controlMode === '4' ? CTRL_H_4 : CTRL_H_2;
+  const availH = window.innerHeight - FIXED_H - ctrlH - safeB;
+  const availW = window.innerWidth - 16;          // 8px padding each side
+  const size   = Math.floor(Math.min(availH, availW) / COLS) * COLS;
+
+  canvas.width  = Math.max(160, size);
+  canvas.height = Math.max(160, size);
+
+  // sync d-pad and 2-button sizes
+  const dpadS = Math.min(ctrlH, 120);
+  document.documentElement.style.setProperty('--dpad-size', dpadS + 'px');
+  document.documentElement.style.setProperty('--btn2-h', ctrlH + 'px');
+
+  // fix controls div height so canvas size stays stable
+  document.getElementById('controls').style.height = ctrlH + 'px';
+}
+
+window.addEventListener('resize', () => { sizeCanvas(); if (state !== 'running') draw(); });
+
+// ── Mode switch ────────────────────────────────────────────────────────────
 document.getElementById('mode4').addEventListener('click', () => setMode('4'));
 document.getElementById('mode2').addEventListener('click', () => setMode('2'));
 
 function setMode(m) {
   controlMode = m;
-  document.getElementById('mode4').classList.toggle('active', m==='4');
-  document.getElementById('mode2').classList.toggle('active', m==='2');
-  document.getElementById('dpad-4').classList.toggle('hidden', m==='2');
-  document.getElementById('dpad-2').classList.toggle('hidden', m==='4');
+  document.getElementById('mode4').classList.toggle('active', m === '4');
+  document.getElementById('mode2').classList.toggle('active', m === '2');
+  document.getElementById('dpad-4').classList.toggle('hidden', m === '2');
+  document.getElementById('dpad-2').classList.toggle('hidden', m === '4');
+  sizeCanvas();
+  if (state !== 'running') draw();
 }
 
-// ── Game logic ─────────────────────────────────────────────────────────────
+// ── Game state ─────────────────────────────────────────────────────────────
+let snake, dir, nextDir, food, score, highscore, state, interval, speed;
+state = 'idle';
+highscore = parseInt(localStorage.getItem('snake_hs') || '0');
+hsEl.textContent = highscore;
+
+function turnLeft(d)  { return {x:  d.y, y: -d.x}; }
+function turnRight(d) { return {x: -d.y, y:  d.x}; }
+
 function init() {
-  snake    = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
-  dir      = DIR.RIGHT;
-  nextDir  = DIR.RIGHT;
-  score    = 0;
-  speed    = 145;
+  snake   = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+  dir     = DIR.RIGHT;
+  nextDir = DIR.RIGHT;
+  score   = 0;
+  speed   = 145;
   scoreEl.textContent = 0;
   placeFood();
   state = 'running';
@@ -377,14 +378,14 @@ function die() {
   clearInterval(interval);
   state = 'dead';
   draw();
-  msgEl.innerHTML = `Mäng läbi! Skoor: <strong>${score}</strong> — vajuta <strong>▶ ALUSTA</strong>`;
+  msgEl.textContent = `Mäng läbi! Skoor: ${score} — vajuta ALUSTA`;
 }
 
 function togglePause() {
   if (state==='running') {
     clearInterval(interval);
     state = 'paused';
-    msgEl.textContent = 'Paus — vajuta uuesti jätkamiseks';
+    msgEl.textContent = 'Paus — vajuta jätkamiseks';
     draw();
   } else if (state==='paused') {
     state = 'running';
@@ -393,91 +394,92 @@ function togglePause() {
   }
 }
 
-// ── Absolute direction input (4-button + keyboard + swipe) ────────────────
+// ── Input helpers ──────────────────────────────────────────────────────────
+function handleStart() {
+  if (state==='idle'||state==='dead') init();
+  else togglePause();
+}
+
 function absDir(key) {
   if (state==='idle'||state==='dead') { init(); return; }
   if (state==='paused') { togglePause(); return; }
   if (state!=='running') return;
-  if ((key==='ArrowUp'    ||key==='w'||key==='W') && dir!==DIR.DOWN)  nextDir=DIR.UP;
-  if ((key==='ArrowDown'  ||key==='s'||key==='S') && dir!==DIR.UP)    nextDir=DIR.DOWN;
-  if ((key==='ArrowLeft'  ||key==='a'||key==='A') && dir!==DIR.RIGHT) nextDir=DIR.LEFT;
-  if ((key==='ArrowRight' ||key==='d'||key==='D') && dir!==DIR.LEFT)  nextDir=DIR.RIGHT;
+  if (key==='U' && dir!==DIR.DOWN)  nextDir=DIR.UP;
+  if (key==='D' && dir!==DIR.UP)    nextDir=DIR.DOWN;
+  if (key==='L' && dir!==DIR.RIGHT) nextDir=DIR.LEFT;
+  if (key==='R' && dir!==DIR.LEFT)  nextDir=DIR.RIGHT;
 }
 
-// ── Relative direction input (2-button) ───────────────────────────────────
-function relDir(turn) { // 'L' or 'R'
+function relDir(turn) {
   if (state==='idle'||state==='dead') { init(); return; }
   if (state==='paused') { togglePause(); return; }
   if (state!=='running') return;
   nextDir = turn==='L' ? turnLeft(dir) : turnRight(dir);
 }
 
-// ── Keyboard ──────────────────────────────────────────────────────────────
+// ── Keyboard ───────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if ([' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
-  if (e.code==='Space') {
-    if (state==='idle'||state==='dead') init();
-    else togglePause();
-    return;
-  }
+  if (e.code==='Space') { handleStart(); return; }
   if (e.key==='p'||e.key==='P') { togglePause(); return; }
+  if (state!=='running') return;
   if (controlMode==='4') {
-    absDir(e.key);
+    if (e.key==='ArrowUp'   ||e.key==='w') absDir('U');
+    if (e.key==='ArrowDown' ||e.key==='s') absDir('D');
+    if (e.key==='ArrowLeft' ||e.key==='a') absDir('L');
+    if (e.key==='ArrowRight'||e.key==='d') absDir('R');
   } else {
-    if (e.key==='ArrowLeft' ||e.key==='a'||e.key==='A') relDir('L');
-    if (e.key==='ArrowRight'||e.key==='d'||e.key==='D') relDir('R');
+    if (e.key==='ArrowLeft' ||e.key==='a') relDir('L');
+    if (e.key==='ArrowRight'||e.key==='d') relDir('R');
   }
 });
 
-// ── 4-button wiring ───────────────────────────────────────────────────────
-document.getElementById('btn4-up').addEventListener('click',    () => absDir('ArrowUp'));
-document.getElementById('btn4-down').addEventListener('click',  () => absDir('ArrowDown'));
-document.getElementById('btn4-left').addEventListener('click',  () => absDir('ArrowLeft'));
-document.getElementById('btn4-right').addEventListener('click', () => absDir('ArrowRight'));
-document.getElementById('btn4-start').addEventListener('click', () => {
-  if (state==='idle'||state==='dead') init(); else togglePause();
-});
+// ── 4-button wiring ────────────────────────────────────────────────────────
+document.getElementById('btn4-up').addEventListener('touchstart',    e=>{e.preventDefault();absDir('U');},{passive:false});
+document.getElementById('btn4-down').addEventListener('touchstart',  e=>{e.preventDefault();absDir('D');},{passive:false});
+document.getElementById('btn4-left').addEventListener('touchstart',  e=>{e.preventDefault();absDir('L');},{passive:false});
+document.getElementById('btn4-right').addEventListener('touchstart', e=>{e.preventDefault();absDir('R');},{passive:false});
+document.getElementById('btn4-start').addEventListener('touchstart', e=>{e.preventDefault();handleStart();},{passive:false});
+document.getElementById('btn4-up').addEventListener('click',    ()=>absDir('U'));
+document.getElementById('btn4-down').addEventListener('click',  ()=>absDir('D'));
+document.getElementById('btn4-left').addEventListener('click',  ()=>absDir('L'));
+document.getElementById('btn4-right').addEventListener('click', ()=>absDir('R'));
+document.getElementById('btn4-start').addEventListener('click', handleStart);
 
-// ── 2-button wiring ───────────────────────────────────────────────────────
-// Use touchstart for instant response on iPhone
+// ── 2-button wiring ────────────────────────────────────────────────────────
 function fastBtn(id, fn) {
   const el = document.getElementById(id);
-  el.addEventListener('touchstart', e => { e.preventDefault(); fn(); el.classList.add('pressed'); }, {passive:false});
-  el.addEventListener('touchend',   e => { e.preventDefault(); el.classList.remove('pressed'); },   {passive:false});
+  el.addEventListener('touchstart', e => {
+    e.preventDefault(); fn(); el.classList.add('pressed');
+  }, {passive:false});
+  el.addEventListener('touchend', e => {
+    e.preventDefault(); el.classList.remove('pressed');
+  }, {passive:false});
   el.addEventListener('click', fn);
 }
-
-fastBtn('btn2-left',  () => relDir('L'));
-fastBtn('btn2-right', () => relDir('R'));
-document.getElementById('btn2-start').addEventListener('touchstart', e => {
-  e.preventDefault();
-  if (state==='idle'||state==='dead') init(); else togglePause();
-}, {passive:false});
-document.getElementById('btn2-start').addEventListener('click', () => {
-  if (state==='idle'||state==='dead') init(); else togglePause();
-});
+fastBtn('btn2-left',  ()=>relDir('L'));
+fastBtn('btn2-right', ()=>relDir('R'));
+document.getElementById('btn2-start').addEventListener('touchstart', e=>{e.preventDefault();handleStart();},{passive:false});
+document.getElementById('btn2-start').addEventListener('click', handleStart);
 
 // ── Swipe on canvas ────────────────────────────────────────────────────────
 let tx=null, ty=null;
-canvas.addEventListener('touchstart', e => { e.preventDefault(); tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:false});
-canvas.addEventListener('touchend', e => {
+canvas.addEventListener('touchstart', e=>{e.preventDefault();tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:false});
+canvas.addEventListener('touchend', e=>{
   e.preventDefault();
-  if (tx===null) return;
+  if(tx===null) return;
   const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
   tx=null; ty=null;
-  if (state==='idle'||state==='dead') { init(); return; }
-  if (Math.abs(dx)<20 && Math.abs(dy)<20) return;
-  if (controlMode==='4') {
-    absDir(Math.abs(dx)>Math.abs(dy) ? (dx>0?'ArrowRight':'ArrowLeft') : (dy>0?'ArrowDown':'ArrowUp'));
+  if(state==='idle'||state==='dead'){init();return;}
+  if(Math.abs(dx)<20&&Math.abs(dy)<20) return;
+  if(controlMode==='4'){
+    if(Math.abs(dx)>Math.abs(dy)) absDir(dx>0?'R':'L');
+    else absDir(dy>0?'D':'U');
   } else {
-    // swipe perpendicular to movement = turn; same axis = ignore
-    if (Math.abs(dx)>Math.abs(dy)) {
-      relDir(dx>0?'R':'L');
-    } else {
-      relDir(dy>0?'R':'L');
-    }
+    if(Math.abs(dx)>Math.abs(dy)) relDir(dx>0?'R':'L');
+    else relDir(dy>0?'R':'L');
   }
-}, {passive:false});
+},{passive:false});
 
 // ── Drawing ────────────────────────────────────────────────────────────────
 function draw() {
@@ -490,18 +492,19 @@ function draw() {
   for(let j=0;j<=ROWS;j++){ctx.beginPath();ctx.moveTo(0,j*C);ctx.lineTo(W,j*C);ctx.stroke();}
 
   // food
-  const fx=food.x*C+C/2, fy=food.y*C+C/2, fr=C/2-Math.max(2,C*0.08);
+  const fx=food.x*C+C/2, fy=food.y*C+C/2, fr=C/2-Math.max(1,C*0.08);
   ctx.beginPath(); ctx.arc(fx,fy,fr,0,Math.PI*2);
-  ctx.fillStyle = state==='dead'?'#555':'#f87171'; ctx.fill();
+  ctx.fillStyle=state==='dead'?'#555':'#f87171'; ctx.fill();
   ctx.strokeStyle='#4ade80'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(fx,fy-fr); ctx.lineTo(fx+Math.max(2,C*0.1),fy-fr-Math.max(3,C*0.15)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(fx,fy-fr); ctx.lineTo(fx+Math.max(2,C*0.1),fy-fr-Math.max(2,C*0.14)); ctx.stroke();
 
   // snake
   snake.forEach((seg,i) => {
-    const x=seg.x*C+1, y=seg.y*C+1, s=C-2, r=Math.max(2,s*0.2);
-    ctx.fillStyle = state==='dead' ? '#555' : i===0 ? '#22c55e' : `hsl(${140-i/snake.length*30},70%,${45-i/snake.length*10}%)`;
+    const x=seg.x*C+1, y=seg.y*C+1, s=C-2, r=Math.max(2,s*0.18);
+    ctx.fillStyle = state==='dead' ? '#555' : i===0 ? '#22c55e'
+      : `hsl(${140-i/snake.length*30},70%,${45-i/snake.length*10}%)`;
     ctx.beginPath(); ctx.roundRect(x,y,s,s,r); ctx.fill();
-    if(i===0 && state!=='dead'){
+    if(i===0&&state!=='dead'){
       const ex=seg.x*C+C*0.35+dir.x*C*0.1, ey=seg.y*C+C*0.35+dir.y*C*0.1, er=Math.max(1.5,C*0.08);
       ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(ex,ey,er*1.5,0,Math.PI*2); ctx.fill();
       ctx.fillStyle='#1a1a2e'; ctx.beginPath(); ctx.arc(ex+dir.x*er*0.5,ey+dir.y*er*0.5,er*0.8,0,Math.PI*2); ctx.fill();
@@ -510,28 +513,27 @@ function draw() {
 
   // overlays
   if(state==='idle'||state==='dead'||state==='paused'){
-    ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(0,0,0,0.62)'; ctx.fillRect(0,0,W,H);
     ctx.textAlign='center';
     if(state==='idle'){
       ctx.fillStyle='#4ade80'; ctx.font=`bold ${Math.max(14,W*0.07)}px -apple-system,sans-serif`;
       ctx.fillText('🐍 USSIMÄNG',W/2,H/2-W*0.05);
-      ctx.fillStyle='#facc15'; ctx.font=`${Math.max(11,W*0.043)}px -apple-system,sans-serif`;
+      ctx.fillStyle='#facc15'; ctx.font=`${Math.max(11,W*0.042)}px -apple-system,sans-serif`;
       ctx.fillText('Vajuta ▶ ALUSTA',W/2,H/2+W*0.06);
     } else if(state==='dead'){
       ctx.fillStyle='#f87171'; ctx.font=`bold ${Math.max(14,W*0.07)}px -apple-system,sans-serif`;
-      ctx.fillText('MÄNG LÄBI',W/2,H/2-W*0.04);
-      ctx.fillStyle='#facc15'; ctx.font=`${Math.max(11,W*0.043)}px -apple-system,sans-serif`;
-      ctx.fillText(`Skoor: ${score}`,W/2,H/2+W*0.05);
+      ctx.fillText('MÄNG LÄBI',W/2,H/2-W*0.05);
+      ctx.fillStyle='#facc15'; ctx.font=`${Math.max(11,W*0.042)}px -apple-system,sans-serif`;
+      ctx.fillText(`Skoor: ${score}`,W/2,H/2+W*0.06);
     } else {
-      ctx.fillStyle='#facc15'; ctx.font=`bold ${Math.max(18,W*0.1)}px -apple-system,sans-serif`;
+      ctx.fillStyle='#facc15'; ctx.font=`bold ${Math.max(16,W*0.09)}px -apple-system,sans-serif`;
       ctx.fillText('PAUS',W/2,H/2);
     }
     ctx.textAlign='left';
   }
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────
-window.addEventListener('resize', () => { sizeCanvas(); if(state!=='running') draw(); });
+// ── Boot ──────────────────────────────────────────────────────────────────
 sizeCanvas();
 snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}]; dir=DIR.RIGHT; food={x:15,y:10};
 draw();
